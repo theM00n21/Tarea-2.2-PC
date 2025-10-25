@@ -6,22 +6,27 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 import altair as alt
 
-st.set_page_config(page_title="Regresión: calificación vs horas hecho por Patricio C", page_icon="📘", layout="centered")
+st.set_page_config(page_title="Regresión: calificación vs horas", page_icon="📘", layout="centered")
 
-# -------------------- DEMO DATA MUY SIMPLE --------------------
-def make_demo_df(n=120, beta0=40.0, beta1=5.0, noise=8.0, seed=11):
+# -------------------- DEMO DATA MÁS REALISTA --------------------
+def make_demo_df(n=80, seed=42):
+    """
+    Simula datos de estudiantes:
+    - horas: 0 a 10 horas de estudio semanales
+    - calificación: 35 a 100, con variabilidad realista
+    """
     rng = np.random.default_rng(seed)
-    horas = np.linspace(0, 10, n)                      # 0 a 10 horas de estudio
-    calif = beta0 + beta1 * horas + rng.normal(0, noise, size=n)
-    calif = np.clip(calif, 0, 100)                     # limitar 0..100
-    return pd.DataFrame({"horas": horas, "calificacion": calif})
+    horas = rng.uniform(0, 10, n)
+    calif = 35 + 6.2 * horas + rng.normal(0, 5, n)  # pendiente realista
+    calif = np.clip(calif, 30, 100)
+    return pd.DataFrame({"horas": np.round(horas, 2), "calificacion": np.round(calif, 2)})
 
 if "df" not in st.session_state:
     st.session_state.df = make_demo_df()
 if "source" not in st.session_state:
     st.session_state.source = "DEMO"
 
-st.title("📘 Regresión lineal: calificación vs horas de estudio hecho por Patricio C")
+st.title("📘 Regresión lineal: calificación vs horas de estudio Hecho Por Patricio C")
 st.caption("Sube un CSV con columnas **horas** y **calificacion** para usar tus propios datos.")
 st.markdown(f"**Fuente actual:** `{st.session_state.source}`")
 
@@ -80,22 +85,22 @@ r2 = float(r2_score(y_test, y_pred))
 
 st.subheader("Ecuación del modelo")
 st.latex(r"\text{calificación} = \beta_0 + \beta_1 \cdot \text{horas}")
-st.write(f"**β₀:** {b0:,.3f}  |  **β₁:** {b1:,.3f}  (puntos por hora)")
+st.write(f"**β₀:** {b0:,.2f}  |  **β₁:** {b1:,.2f}  (puntos por hora de estudio)")
 
 c3, c4 = st.columns(2)
 c3.metric("R² (test)", f"{r2:.4f}")
-c4.metric("RMSE (test)", f"{rmse:.3f}")
+c4.metric("RMSE (test)", f"{rmse:.2f}")
 
 # -------------------- GRÁFICA --------------------
 grid = pd.DataFrame({"horas": np.linspace(X.min(), X.max(), 100).ravel()})
 grid["calif_pred"] = model.predict(grid[["horas"]])
 
-pts = alt.Chart(df).mark_circle(size=60, opacity=0.6).encode(
+pts = alt.Chart(df).mark_circle(size=60, opacity=0.6, color="#4B9CD3").encode(
     x=alt.X("horas", title="Horas de estudio"),
     y=alt.Y("calificacion", title="Calificación (0–100)"),
     tooltip=["horas", "calificacion"]
 )
-linea = alt.Chart(grid).mark_line().encode(
+linea = alt.Chart(grid).mark_line(color="red").encode(
     x="horas", y=alt.Y("calif_pred", title="Calificación (predicha)")
 )
 st.subheader("Datos y recta ajustada")
@@ -106,8 +111,8 @@ st.header("Predicción rápida")
 h = st.number_input("Horas de estudio (una sola)", value=float(np.median(X)))
 pred = model.predict(np.array([[h]])).item()
 pred = float(np.clip(pred, 0, 100))
-st.success(f"Predicción de calificación para {h:,.2f} horas: **{pred:,.2f}**")
+st.success(f"Predicción de calificación para {h:,.2f} horas: **{pred:,.2f} puntos**")
 
 # -------------------- FIRMA --------------------
 st.markdown("---")
-st.caption("Firma: Patricio C")
+st.caption("Signature: Patricio C")
