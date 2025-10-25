@@ -21,7 +21,7 @@ if "df" not in st.session_state:
 if "source" not in st.session_state:
     st.session_state.source = "DEMO"
 
-st.title("📘 Regresión lineal: calificación vs horas de estudio")
+st.title("📘 Regresión lineal: calificación vs horas de estudio hecho por Patricio C")
 st.caption("Sube un CSV con columnas **horas** y **calificacion** para usar tus propios datos.")
 st.markdown(f"**Fuente actual:** `{st.session_state.source}`")
 
