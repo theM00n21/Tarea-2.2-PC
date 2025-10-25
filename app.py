@@ -115,4 +115,4 @@ st.success(f"Predicción de calificación para {h:,.2f} horas: **{pred:,.2f} pun
 
 # -------------------- FIRMA --------------------
 st.markdown("---")
-st.caption("Signature: Patricio C")
+st.caption("Hecho Por: Patricio C")
